@@ -18,7 +18,7 @@ int main(int argc, char const *argv[])
 	memset(&serv_addr, 0, sizeof(serv_addr));
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-	serv_addr.sin_port = htons(1234);
+	serv_addr.sin_port = htons(9999);
 	
 	connect(serv_sock, (sockaddr*)&serv_addr, sizeof(serv_addr));
 
@@ -26,12 +26,18 @@ int main(int argc, char const *argv[])
 	char buffer[1024];
 	while (std::cin>>cmd)
 	{
-		write(serv_sock, cmd, strlen(cmd));
-		read(serv_sock, buffer, sizeof(buffer));
+		bzero(buffer, sizeof(buffer));
+
+		write(serv_sock, cmd, strlen(cmd) + 1);
+		int data_size = read(serv_sock, buffer, sizeof(buffer));
+		if (data_size == 0)
+		{
+			printf("server close");
+			break;
+		}
 		printf("%s\n", buffer);
 
 		bzero(cmd, sizeof(cmd));
-		bzero(buffer, sizeof(buffer));
 	}
 	close(serv_sock);
 	return 0;
